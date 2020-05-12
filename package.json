@@ -1,8 +1,8 @@
 {
-  "name": "ifbackwards",
-  "productName": "ifbackwards",
-  "version": "1.0.0",
-  "description": "f1 spelt backwards is if",
+  "name": "passible",
+  "productName": "passible",
+  "version": "0.0.1",
+  "description": "multiPass and Ansible deployment tool, create VMs(multipass/cloud-init) and configure them (Ansible)",
   "main": "src/index.js",
   "scripts": {
     "start": "electron-forge start",
@@ -14,8 +14,11 @@
     "css-watch": "npm run css-build -- --watch",
     "css-start": "npm run css-watch"
   },
-  "keywords": [],
-  "author": "karl",
+  "keywords": [
+    "multipass",
+    "ansible"
+  ],
+  "author": "Karl Denby",
   "license": "GPL-3.0-or-later",
   "config": {
     "forge": {
