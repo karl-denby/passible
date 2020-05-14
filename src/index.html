@@ -10,8 +10,7 @@
   <body>
     <div class="box">
       <h1 class="title">Passible</h1>
-      <p class="notification">lorem ipsum</p>
-      <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Rerum velit quos, illum optio illo asperiores fugiat voluptates nihil facilis quasi fugit est sit numquam? Quis reiciendis pariatur aspernatur aut sint.</p>
+      <p>POC: Create VM (works, but you need to copy your hosts .ssh/id_pub to guests .ssh/authorized_keys), use ansible to do something (we check ufw status using sudo) and delete/purge the VM</p>
       <p class="box">
         Platform is: <b><script>document.write(process.platform)</script></b>
       </p>
@@ -20,6 +19,7 @@
         <button id="btnConfigureVM" class="button is-primary is-rounded column is-one-third" type="button">Configure</button>
         <button id="btnDeleteVM" class="button is-primary is-rounded column is-one-third" type="button">Delete</button>
       </div>
+      <p id="txtOutput" class="notification">Command output will appear here...</p>
     </div>
   </body>
 </html>
