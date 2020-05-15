@@ -3,14 +3,16 @@ const { dialog, Menu } = remote;
 const { exec } = require("child_process");
 
 const btnCreateVM = document.getElementById("btnCreateVM");
+const txtCreateVM = document.getElementById("txtCreateVM");
 const btnConfigureVM = document.getElementById("btnConfigureVM");
 const btnDeleteVM = document.getElementById("btnDeleteVM");
 const txtOutput = document.getElementById("txtOutput");
-let total = 0;
+var machine_list = "";
 
 btnCreateVM.onclick = (e) => {
+  console.log(txtCreateVM.value)
   const createCmd =
-    "multipass launch --disk 6G --mem 512m --cpus 1 --name passible0";
+    `multipass launch --disk 8G --mem 512m --cpus 1 --name ${txtCreateVM.value}`;
 
   txtOutput.innerHTML = `Please wait, while we run the command: ${createCmd}`;
   exec(createCmd, (error, stdout, stderr) => {
@@ -23,12 +25,18 @@ btnCreateVM.onclick = (e) => {
       return;
     }
     txtOutput.innerHTML = `done: ${stdout}`;
+    const listCmd = `multipass list`;
+
+    exec(listCmd, (error, stdout, stderr) => {
+      machine_list = stdout;
+      console.log(machine_list)
+    });
   });
 };
 
 // binConfigureVM increament fuction
 btnConfigureVM.onclick = (e) => {
-  configCmd = `ansible all -i 'ubuntu@192.168.122.109,' -a "ufw status" -b`
+  const configCmd = `ansible all -i 'ubuntu@192.168.122.109,' -a "ufw status" -b`
   txtOutput.innerHTML = `Please wait, while we run the command: ${configCmd}`;
   exec(configCmd, (error, stdout, stderr) => {
     if (error) {
