@@ -9,6 +9,21 @@ const btnDeleteVM = document.getElementById("btnDeleteVM");
 const txtOutput = document.getElementById("txtOutput");
 let targetVM = {}
 
+function getVmInfo(mp_list, vm_name) {
+  console.log('running')
+  let txt_lines = mp_list.split("\n")
+  let data = {}
+
+  txt_lines.forEach(line => {
+    line = line.replace(/\s+/g, ' ');  // trim multiple spaces to a single space
+    line = line.split(" ")
+    if (line[0] === vm_name) {
+      data =  { name: line[0], state: line[1], ipv4: line[2], image: line[3] }
+    }
+  });
+  return data
+}
+
 btnCreateVM.onclick = (e) => {
   targetVM.name = txtCreateVM.value
   const createCmd =
@@ -20,20 +35,27 @@ btnCreateVM.onclick = (e) => {
       if (stderr) { txtOutput.innerHTML = stderr }
       if (stdout) { txtOutput.innerHTML = stdout }
   });
-
-  // TODO - get ip for machines that has just been created and set it
-  targetVM.ip = '192.168.64.8'
 };
 
 btnConfigureVM.onclick = (e) => {
-  exec(`multipass copy-files ~/.ssh/id_rsa.pub ${txtCreateVM.value}:/home/ubuntu/.ssh/authorized_keys`, (error, stdout, stderr) => {
+  exec(`multipass list`, (error, stdout, stderr) => {
+    if (error) { txtOutput.innerHTML = error }
+    if (stderr) { txtOutput.innerHTML = stderr }
+    if (stdout) {
+      txtOutput.innerHTML = stdout
+      targetVM = getVmInfo(stdout, txtCreateVM.value)
+    }
+  });
+
+  exec(`multipass copy-files ~/.ssh/id_rsa.pub ${targetVM.name}:/home/ubuntu/.ssh/authorized_keys`, (error, stdout, stderr) => {
     if (error) { console.log(error) }
     if (stderr) { console.log(stderr) }
     if (stdout) { console.log(stdout) }
   });
 
-  const configCmd = `env ANSIBLE_HOST_KEY_CHECKING=false ansible all -i 'ubuntu@${targetVM.ip},' -m setup -b -e '{"ansible_python_interpreter":"/usr/bin/python3"}'`
+  const configCmd = `env ANSIBLE_HOST_KEY_CHECKING=false ansible all -i 'ubuntu@${targetVM.ipv4},' -m setup -b -e '{"ansible_python_interpreter":"/usr/bin/python3"}'`
   txtOutput.innerHTML = `Please wait, while we run the command: ${configCmd}`;
+
   exec(configCmd, (error, stdout, stderr) => {
     if (error) { txtOutput.innerHTML = `error: ${error.message}` }
     if (stderr) { txtOutput.innerHTML = `stderr: ${stderr}` }
