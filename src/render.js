@@ -7,62 +7,46 @@ const txtCreateVM = document.getElementById("txtCreateVM");
 const btnConfigureVM = document.getElementById("btnConfigureVM");
 const btnDeleteVM = document.getElementById("btnDeleteVM");
 const txtOutput = document.getElementById("txtOutput");
-var machine_list = "";
+let targetVM = {}
 
 btnCreateVM.onclick = (e) => {
-  console.log(txtCreateVM.value)
+  targetVM.name = txtCreateVM.value
   const createCmd =
-    `multipass launch --disk 8G --mem 512m --cpus 1 --name ${txtCreateVM.value}`;
+    `multipass launch --disk 8G --mem 512m --cpus 1 --name ${targetVM.name}`;
 
   txtOutput.innerHTML = `Please wait, while we run the command: ${createCmd}`;
   exec(createCmd, (error, stdout, stderr) => {
-    if (error) {
-      txtOutput.innerHTML = `error: ${error.message}`;
-      return;
-    }
-    if (stderr) {
-      txtOutput.innerHTML = `stderr: ${stderr}`;
-      return;
-    }
-    txtOutput.innerHTML = `done: ${stdout}`;
-    const listCmd = `multipass list`;
-
-    exec(listCmd, (error, stdout, stderr) => {
-      machine_list = stdout;
-      console.log(machine_list)
-    });
+      if (error) { txtOutput.innerHTML = error }
+      if (stderr) { txtOutput.innerHTML = stderr }
+      if (stdout) { txtOutput.innerHTML = stdout }
   });
+
+  // TODO - get ip for machines that has just been created and set it
+  targetVM.ip = '192.168.64.8'
 };
 
-// binConfigureVM increament fuction
 btnConfigureVM.onclick = (e) => {
-  const configCmd = `ansible all -i 'ubuntu@192.168.122.109,' -a "ufw status" -b`
+  exec(`multipass copy-files ~/.ssh/id_rsa.pub ${txtCreateVM.value}:/home/ubuntu/.ssh/authorized_keys`, (error, stdout, stderr) => {
+    if (error) { console.log(error) }
+    if (stderr) { console.log(stderr) }
+    if (stdout) { console.log(stdout) }
+  });
+
+  const configCmd = `env ANSIBLE_HOST_KEY_CHECKING=false ansible all -i 'ubuntu@${targetVM.ip},' -m setup -b -e '{"ansible_python_interpreter":"/usr/bin/python3"}'`
   txtOutput.innerHTML = `Please wait, while we run the command: ${configCmd}`;
   exec(configCmd, (error, stdout, stderr) => {
-    if (error) {
-      txtOutput.innerHTML = `error: ${error.message}`;
-      return;
-    }
-    if (stderr) {
-      txtOutput.innerHTML = `stderr: ${stderr}`;
-      return;
-    }
+    if (error) { txtOutput.innerHTML = `error: ${error.message}` }
+    if (stderr) { txtOutput.innerHTML = `stderr: ${stderr}` }
     txtOutput.innerHTML = `done: ${stdout}`;
   });
+
 };
 
-// binDeleteVM increament fuction
 btnDeleteVM.onclick = (e) => {
-  const deleteCmd = "multipass delete passible0 && multipass purge";
+  const deleteCmd = `multipass delete ${txtCreateVM.value} && multipass purge`;
   exec(deleteCmd, (error, stdout, stderr) => {
-    if (error) {
-      txtOutput.innerHTML = `error: ${error.message}`;
-      return;
-    }
-    if (stderr) {
-      txtOutput.innerHTML = `stderr: ${stderr}`;
-      return;
-    }
+    if (error) { txtOutput.innerHTML = `error: ${error.message}` }
+    if (stderr) { txtOutput.innerHTML = `stderr: ${stderr}` }
     txtOutput.innerHTML = `done: ${stdout}`;
   });
 };

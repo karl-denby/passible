@@ -10,7 +10,12 @@
   <body>
     <div class="box">
       <h1 class="title">Passible</h1>
-      <p>POC: Create VM (works, but you need to copy your hosts .ssh/id_pub to guests .ssh/authorized_keys), use ansible to do something (we check ufw status using sudo) and delete/purge the VM</p>
+      <strong>Proof of Concept:</strong>
+      <ul>
+         <li>Create VM via multipass works</li>
+         <li>Configure VM via ansible ad-hoc works if given the right IP</li>
+         <li>Delete VM via multipass works</li>
+      </ul>
       <p class="box">
         Platform is: <b><script>document.write(process.platform)</script></b>
       </p>
