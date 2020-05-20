@@ -13,12 +13,17 @@
       <strong>Proof of Concept:</strong>
       <ul>
          <li>Create VM via multipass works</li>
-         <li>Configure VM via ansible ad-hoc works if given the right IP</li>
+         <li>Configure VM via ansible ad-hoc works</li>
          <li>Delete VM via multipass works</li>
       </ul>
       <p class="box">
         Platform is: <b><script>document.write(process.platform)</script></b>
       </p>
+      <div>
+        <button id="btnDiscoverVM" class="button is-primary is-rounded is-one-quarter" type="button">Discover</button>
+        <p id="txtListVM">Discovered VMs: </p>
+        <br>
+      </div>
       <div class="columns">
         <button id="btnCreateVM" class="button is-primary is-rounded column is-one-quarter" type="button">Create</button>
         <input id="txtCreateVM" class="input is-primary column is-one-quarter" type="input">
