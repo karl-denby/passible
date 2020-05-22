@@ -10,27 +10,31 @@ const txtCreateVM = document.getElementById("txtCreateVM");
 const btnConfigureVM = document.getElementById("btnConfigureVM");
 const btnDeleteVM = document.getElementById("btnDeleteVM");
 const txtOutput = document.getElementById("txtOutput");
-let inventory = []
-let targetVM = {}
+var inventory = [];
+var targetVM = {};
+
+function ansibleInventory() {
+  return 'ubuntu@10.203.58.74,ubuntu@10.203.58.249,ubuntu@10.203.58.239,'
+}
 
 function getAllVmInfo() {
-  const list = "multipass list"
-  let data = []
-  
+  const list = "multipass list";
+  let data = [];
+
   const run = exec(list, (error, stdout, stderr) => {
     if (error) return error;
     if (stderr) return stderr;
 
     const txt_lines = stdout.split("\n")
-    
-    txt_lines.forEach(line => {  
+
+    txt_lines.forEach(line => {
       line = line.replace(/\s+/g, ' ');  // trim multiple spaces
-      line = line.split(" ")
+      line = line.split(" ");
       if ((line[0] != '' && line[0] != 'Name' && line[0] != "No")) {
-        data.push({ 
-          "name": line[0], 
-          "state": line[1], 
-          "ipv4": line[2], 
+        data.push({
+          "name": line[0],
+          "state": line[1],
+          "ipv4": line[2],
           "image": line[3]
         })
       }
@@ -44,19 +48,20 @@ function getAllVmInfo() {
       inventory = []
     }
   })
+  return inventory;
 };
 
 
 btnDiscoverVM.onclick = (e) => {
-  txtListVM.innerHTML = "Discovered VMs: "
-  getAllVmInfo()
-  inventory.forEach((item, index) => {   
+  txtListVM.innerHTML = "Discovered VMs: ";
+  getAllVmInfo();
+  inventory.forEach((item, index) => {
     txtListVM.innerHTML += ` ${item.name}(${item.ipv4}),`
   })
 };
 
 btnCreateVM.onclick = (e) => {
-  targetVM.name = txtCreateVM.value
+  targetVM.name = txtCreateVM.value;
   const createCmd =
     `multipass launch --disk 8G --mem 512m --cpus 1 --name ${targetVM.name}`;
 
@@ -68,32 +73,51 @@ btnCreateVM.onclick = (e) => {
   });
 
   ssh.on('exit', (code) => {
-    getAllVmInfo()
+    getAllVmInfo();
   })
 
 };
 
 btnConfigureVM.onclick = (e) => {
-  targetVM.name = txtCreateVM.value
-  targetVM.ipv4 = inventory.find(vm => vm.name === targetVM.name).ipv4
-  
-  const ssh = exec(`multipass copy-files ~/.ssh/id_rsa.pub ${targetVM.name}:/home/ubuntu/.ssh/authorized_keys`, (error, stdout, stderr) => {
+  targetVM.name = txtCreateVM.value;
+  let local = getAllVmInfo()
+  targetVM.ipv4 = local.find(vm => vm.name === targetVM.name).ipv4;
+
+  const mp_copy = exec(`multipass copy-files ~/.ssh/id_rsa.pub ${targetVM.name}:/home/ubuntu/.ssh/new_key`, (error, stdout, stderr) => {
     if (error) { console.log(error) }
     if (stderr) { console.log(stderr) }
     if (stdout) { console.log(stdout) }
   });
 
-  ssh.on('exit', (code) => {
-    const configCmd = `env ANSIBLE_HOST_KEY_CHECKING=false ansible all -i 'ubuntu@${targetVM.ipv4},' -m setup -b -e '{"ansible_python_interpreter":"/usr/bin/python3"}'`
-    txtOutput.innerHTML = `Please wait, while we run the command: ${configCmd}`;
-  
-    exec(configCmd, (error, stdout, stderr) => {
-      if (error) { txtOutput.innerHTML = `error: ${error.message}` }
-      if (stderr) { txtOutput.innerHTML = `stderr: ${stderr}` }
-      txtOutput.innerHTML = `done: ${stdout}`;
-    });  
-  })
+  mp_copy.on('exit', (code) => {
+    const ssh = exec(`multipass exec ${targetVM.name} -- cat /home/ubuntu/.ssh/new_key >> /home/ubuntu/.ssh/authorized_keys`, (error, stdout, stderr) => {
+      if (error) { console.log(error) }
+      if (stderr) { console.log(stderr) }
+      if (stdout) { console.log(stdout) }
+    });
 
+    ssh.on('exit', (code) => {
+      // We want to run this playbook via ansible command
+      const ENV = 'env ANSIBLE_HOST_KEY_CHECKING=false';
+      const playbook = __dirname + '/playbooks/hostnames.ansible';
+      const inventory = ansibleInventory();
+      const extras = '{"ansible_python_interpreter":"/usr/bin/python3"}';
+      const cmd = `${ENV} ansible-playbook -i ${inventory} -e ${extras} ${playbook}`;
+
+      const configCmd = `env ANSIBLE_HOST_KEY_CHECKING=false ansible all -i 'ubuntu@${targetVM.ipv4},' -m setup -b -e '{"ansible_python_interpreter":"/usr/bin/python3"}'`
+      txtOutput.innerHTML = `Please wait, while we run the command: ${configCmd}`;
+
+      const ansible = exec(cmd, (error, stdout, stderr) => {
+        if (error) { txtOutput.innerHTML = `error: ${error.message}` }
+        if (stderr) { txtOutput.innerHTML = `stderr: ${stderr}` }
+        if (stdout) { txtOutput.innerHTML = `done: ${stdout}`; }
+      });
+
+      ansible.on('exit', (code) => {
+        console.log(`ansible exit code: ${code}`);
+      })
+    })
+  })
 };
 
 btnDeleteVM.onclick = (e) => {
@@ -101,10 +125,10 @@ btnDeleteVM.onclick = (e) => {
   const ssh = exec(deleteCmd, (error, stdout, stderr) => {
     if (error) { txtOutput.innerHTML = `error: ${error.message}` }
     if (stderr) { txtOutput.innerHTML = `stderr: ${stderr}` }
-    txtOutput.innerHTML = `done: ${stdout}`;
+    if (stdout) { txtOutput.innerHTML = `done: ${stdout}`; }
   });
 
   ssh.on('exit', (code) => {
-    getAllVmInfo()
+    getAllVmInfo();
   })
 }
