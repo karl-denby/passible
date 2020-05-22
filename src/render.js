@@ -121,7 +121,7 @@ btnConfigureVM.onclick = (e) => {
 };
 
 btnDeleteVM.onclick = (e) => {
-  const deleteCmd = `multipass delete ${txtCreateVM.value} && multipass purge`;
+  const deleteCmd = `multipass delete -p ${txtCreateVM.value}`;
   const ssh = exec(deleteCmd, (error, stdout, stderr) => {
     if (error) { txtOutput.innerHTML = `error: ${error.message}` }
     if (stderr) { txtOutput.innerHTML = `stderr: ${stderr}` }
