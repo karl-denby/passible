@@ -1,0 +1,78 @@
+---
+- name: Install MongoDB via Apt
+  hosts: all
+  gather_facts: yes
+  tasks:  
+
+  - name: "Install MongoDB Enterprise dependencies via apt"
+    become: yes
+    become_user: root
+    apt:
+      name: "{{ packages }}"
+      state: present
+    vars:
+      packages:
+          - libcurl3
+          - libcurl4
+          - libgssapi-krb5-2
+          - libkrb5-dbg
+          - libldap-2.4-2
+          - libpci3
+          - libsasl2-2
+          - snmp
+          - openssl
+          - gnupg
+    with_items: "{{groups['all']}}"
+
+  - name: add apt-key
+    become: yes
+    become_user: root
+    apt_key: 
+      url: https://www.mongodb.org/static/pgp/server-4.2.asc 
+      state: present 
+    with_items: "{{groups['all']}}"
+
+  - name: add apt repository
+    become: yes
+    become_user: root
+    apt_repository: 
+      repo: "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.2 multiverse" 
+      state: present 
+      filename: mongodb-org-4.2.list 
+      update_cache: yes
+    with_items: "{{groups['all']}}"
+
+  - name: install mongodb-org
+    become: yes
+    become_user: root
+    apt: 
+      name: "{{ packages }}"
+      state: present
+      update_cache: yes
+    vars:
+      packages:
+          - mongodb-org
+          - mongodb-org-shell
+          - mongodb-org-mongos
+          - mongodb-org-server
+    with_items: "{{groups['all']}}"
+
+  - name: "Create dbpath for Application Database via apt"
+    become: yes
+    become_user: root
+    file: path=/data/appdb state=directory mode=0755 owner=mongodb group=mongodb
+    with_items: "{{groups['all']}}"
+
+  - name: "Enable mongod service"
+    become: yes
+    become_user: root
+    service:
+      name: mongod
+      enabled: yes
+    with_items: "{{groups['all']}}"
+
+  - name: "Start mongod for the Application Database"
+    become: yes
+    become_user: root
+    service: name=mongod state=started
+    with_items: "{{groups['all']}}"

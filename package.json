@@ -1,7 +1,7 @@
 {
   "name": "passible",
   "productName": "passible",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "multiPass and Ansible deployment tool, create VMs(multipass/cloud-init) and configure them (Ansible)",
   "main": "src/index.js",
   "scripts": {
