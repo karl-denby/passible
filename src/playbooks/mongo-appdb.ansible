@@ -2,7 +2,7 @@
 - name: Install MongoDB via Apt
   hosts: all
   gather_facts: yes
-  tasks:  
+  tasks:
 
   - name: "Install MongoDB Enterprise dependencies via apt"
     become: yes
@@ -10,9 +10,11 @@
     apt:
       name: "{{ packages }}"
       state: present
+      update_cache: yes
     vars:
       packages:
           - libcurl3
+          - libcurl3-gnutls
           - libcurl4
           - libgssapi-krb5-2
           - libkrb5-dbg
@@ -27,25 +29,25 @@
   - name: add apt-key
     become: yes
     become_user: root
-    apt_key: 
-      url: https://www.mongodb.org/static/pgp/server-4.2.asc 
-      state: present 
+    apt_key:
+      url: https://www.mongodb.org/static/pgp/server-4.2.asc
+      state: present
     with_items: "{{groups['all']}}"
 
   - name: add apt repository
     become: yes
     become_user: root
-    apt_repository: 
-      repo: "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.2 multiverse" 
-      state: present 
-      filename: mongodb-org-4.2.list 
+    apt_repository:
+      repo: "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.2 multiverse"
+      state: present
+      filename: mongodb-org-4.2.list
       update_cache: yes
     with_items: "{{groups['all']}}"
 
   - name: install mongodb-org
     become: yes
     become_user: root
-    apt: 
+    apt:
       name: "{{ packages }}"
       state: present
       update_cache: yes
