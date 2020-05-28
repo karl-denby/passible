@@ -11,12 +11,6 @@ const btnConfigureVM = document.getElementById("btnConfigureVM")
 const btnDeleteVM = document.getElementById("btnDeleteVM")
 const txtOutput = document.getElementById("txtOutput")
 
-var mp_list = ''
-var mp_list_array = []
-var mp_list_string = ''
-var ansible_inventory = ''
-var targetVM = {}
-
 
 function mutateStatus(message) {
   txtOutput.innerHTML = ''
@@ -35,8 +29,11 @@ function convertListToObject(out) {
   let data = []
 
   txt_lines.forEach(line => {
-    line = line.replace(/\s+/g, ' ');  // trim multiple spaces
+    // trim extra spaces, then split on space
+    line = line.replace(/\s+/g, ' ');
     line = line.split(" ");
+
+    // items 4,5,6 might exist but not needed for now
     if ((line[0] != '' && line[0] != 'Name' && line[0] != "No")) {
       data.push({
         "name": line[0],
@@ -46,28 +43,28 @@ function convertListToObject(out) {
       })
     }
   });
-  mp_list_array = data
+  return(data)
 }
 
 
 btnDiscoverVM.onclick = (e) => {
-  mp_list_string = ``
-  ansible_inventory = ``
-  console.log(`before: ${mp_list}`)
-  runCommands([`multipass list`])
-  console.log(`after: ${mp_list}`)
-  convertListToObject(mp_list)
 
-  mp_list_array.forEach((item, index) => {
+  const mp_list = runCommands([`multipass list`])
+  const mp_inventory = convertListToObject(mp_list)
+
+  let mp_list_string = ''
+  mp_inventory.forEach((item, index) => {
     mp_list_string += ` ${item.name}(${item.ipv4}),`
   })
 
-  ansible_inventory = []
-  mp_list_array.forEach(vm => {
+  let ansible_inventory = []
+  mp_inventory.forEach(vm => {
     ansible_inventory.push(` ubuntu@${vm.ipv4}`)
   })
 
-  ansible_inventory += ','
+  if (ansible_inventory.length > 0) {
+    ansible_inventory += ','
+  }
 
   mutateDiscover(mp_list_string)
   mutateStatus(ansible_inventory)
@@ -75,39 +72,31 @@ btnDiscoverVM.onclick = (e) => {
 
 
 btnCreateVM.onclick = (e) => {
-  targetVM.name = txtCreateVM.value
-  const createCmd =
-    `multipass launch --disk 4G --mem 512m --cpus 1 --name ${targetVM.name}`
+  const cmd =
+    `multipass launch --disk 4G --mem 512m --cpus 1 --name ${txtCreateVM.value}`
 
-  mutateStatus(`Please wait, while we run the command: ${createCmd}`)
-  const ssh = exec(createCmd, (error, stdout, stderr) => {
-      if (error) mutateStatus(error)
-      if (stderr) mutateStatus(stderr)
-      if (stdout) mutateStatus(stdout)
-  });
-
-  ssh.on('exit', (code) => {
-    console.log(`Completed: ${createCmd}`)
-  })
+  mutateStatus(`Please wait, while we run the command: ${cmd}`)
+  mutateStatus(`Result: ${runCommands([cmd])}`)
 };
 
 
 function runCommands(commands) {
   if (!commands) { return 'no command sequence provided' }
 
+  let last_output = ''
+
   console.log(`Running: ${commands[0]}`)
   // Run command zero in the list
   const cmd = exec(commands[0], (error, stdout, stderr) => {
-    if (error)  { console.log(`error: ${error}`) }
-    if (stderr) { console.log(`stderr: ${stderr}`) }
-    if (stdout) { console.log(`stdout: ${stdout}`) }
+    if (error)  { last_output = error }
+    if (stderr) { last_output = stderr }
+    if (stdout) { last_output = stdout }
   });
 
   cmd.on('exit', (code) => {
     if (code === 0) {
       const newCommands = commands.slice(1)
-      if (newCommands.length === 0) return 'done'
-      runCommands(newCommands)
+      newCommands.length === 0 ? last_output : runCommands(newCommands)
     }
   });
 } // runCommands(commands)
@@ -136,21 +125,13 @@ function apHostnames() {
 
   mutateStatus(`Please wait, while we run the command: ${cmd}`)
 
-  const ansible = exec(cmd, (error, stdout, stderr) => {
-    if (error) mutateStatus(`error: ${error}`)
-    if (stderr) mutateStatus(`stderr: ${stderr}`)
-    if (stdout) mutateStatus(`stdout: ${stdout}`)
-  });
-
-  ansible.on('exit', (code) => {
-    console.log(`ansible exit code: ${code}`)
-  })
+  runCommands([cmd])
 }
 
 
 btnConfigureVM.onclick = (e) => {
   targetVM.name = txtCreateVM.value
-  targetVM.ipv4 = mp_list_array.map(function(vm) {
+  targetVM.ipv4 = mp_list_array.map((vm) => {
     if( targetVM.name === vm.name) return vm.ipv4
     if( targetVM.name != vm.name) return '0.0.0.0'
   });
@@ -162,29 +143,11 @@ btnConfigureVM.onclick = (e) => {
   const cmd = `${ENV} ansible-playbook -i 'ubuntu@${targetVM.ipv4},' -e ${extras} ${playbook}`
 
   mutateStatus(`Please wait, while we run the command: ${cmd}`)
-
-  const ansible = exec(cmd, (error, stdout, stderr) => {
-    if (error) mutateStatus(`error: ${error}`)
-    if (stderr) mutateStatus(`stderr: ${stderr}`)
-    if (stdout) mutateStatus(`stdout: ${stdout}`)
-  });
-
-  ansible.on('exit', (code) => {
-    console.log(`ansible exit code: ${code}`)
-  })
+  runCommands([cmd])
 }
 
 
 btnDeleteVM.onclick = (e) => {
-  const deleteCmd = `multipass delete -p ${txtCreateVM.value}`
-
-  const ssh = exec(deleteCmd, (error, stdout, stderr) => {
-    if (error) mutateStatus(`error: ${error}`)
-    if (stderr) mutateStatus(`stderr: ${stderr}`)
-    if (stdout) mutateStatus(`stdout: ${stdout}`)
-  });
-
-  ssh.on('exit', (code) => {
-    setTimeout(function(){ btnDiscoverVM.onclick(); }, 5000)
-  })
+  const cmd = `multipass delete -p ${txtCreateVM.value}`
+  runCommands([cmd])
 }
