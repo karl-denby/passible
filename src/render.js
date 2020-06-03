@@ -1,52 +1,64 @@
-const { remote } = require("electron");
-const { dialog, Menu } = remote;
-const { exec } = require("child_process");
+const { remote } = require("electron")
+const { dialog, Menu } = remote
+const { exec } = require("child_process")
 
-const btnDiscoverVM = document.getElementById("btnDiscoverVM");
-const btnSetupVM = document.getElementById("btnSetupVM");
-const txtListVM = document.getElementById("txtListVM");
+// UI Elements
+const btnDiscoverVM = document.getElementById("btnDiscoverVM")
+const btnSetupVM = document.getElementById("btnSetupVM")
+const txtListVM = document.getElementById("txtListVM")
+const btnCreateVM = document.getElementById("btnCreateVM")
+const txtCreateVM = document.getElementById("txtCreateVM")
+const btnConfigureVM = document.getElementById("btnConfigureVM")
+const btnDeleteVM = document.getElementById("btnDeleteVM")
+const txtOutput = document.getElementById("txtOutput")
 
-const btnCreateVM = document.getElementById("btnCreateVM");
-const txtCreateVM = document.getElementById("txtCreateVM");
-const btnConfigureVM = document.getElementById("btnConfigureVM");
-const btnDeleteVM = document.getElementById("btnDeleteVM");
-const txtOutput = document.getElementById("txtOutput");
+// Global State
+let gMultiPassListArray = []
+let gAnsibleInventoryString = ''
 
-var mp_list = '';
-var mp_list_array = [];
-var mp_list_string = '';
-var ansible_inventory = '';
+// --- --- --- Main --- --- ---
+function runCommands(commands, callback) {
+  !commands ? console.error('no command sequence provided') : console.info(`Running: ${commands[0]}`)
 
-var targetVM = {};
+  // Run command[0] if its the last/only in the list invoke callback to deal with results
+  const cmd = exec(commands[0], (error, stdout, stderr) => {
+    if (error && commands.length === 1) { callback(error) }
+    if (stderr && commands.length === 1) { callback(stderr) }
+    if (stdout && commands.length === 1) { callback(stdout) }
+  });
 
-function multipassList() {
-  const cmd = "multipass list";
-  let inventory = '';
-  
-  exec(cmd, (error, stdout, stderr) => {
-    if (error) mutateDiscover(error);
-    if (stderr) mutateDiscover(stderr);
-    if (stdout) mp_list = stdout;
-  })
-};
+  // If we have more commands to run slice 0 of the front and start execution again
+  cmd.on('close', (code) => {
+    if (code === 0) {
+      const newCommands = commands.slice(1)
+      if (newCommands.length != 0) { runCommands(newCommands, callback) }
+  }});
+
+}
+
 
 function mutateStatus(message) {
-  txtOutput.innerHTML = '';
-  txtOutput.innerHTML = message;
+  txtOutput.innerHTML = message + ','
 }
 
 function mutateDiscover(message) {
-  txtListVM.innerHTML = '';
-  txtListVM.innerHTML = message;
+  txtListVM.innerHTML = message
 }
 
-function convertListToObject(out) {
+function mutateAnsibleInventory(message) {
+  gAnsibleInventoryString = message
+}
+
+function mpListAsObject(out) {
   const txt_lines = out.split("\n")
-  let data = [];
+  let data = []
 
   txt_lines.forEach(line => {
-    line = line.replace(/\s+/g, ' ');  // trim multiple spaces
+    // trim extra spaces, then split on space
+    line = line.replace(/\s+/g, ' ');
     line = line.split(" ");
+
+    // items 4,5,6 might exist but not needed for now
     if ((line[0] != '' && line[0] != 'Name' && line[0] != "No")) {
       data.push({
         "name": line[0],
@@ -56,149 +68,105 @@ function convertListToObject(out) {
       })
     }
   });
-  mp_list_array = data;
+  return(data)
 }
 
+
 btnDiscoverVM.onclick = (e) => {
-  mp_list_string = ``;  
-  ansible_inventory = ``;
-  multipassList();
-  convertListToObject(mp_list);
-  
-  mp_list_array.forEach((item, index) => {
-    mp_list_string += ` ${item.name}(${item.ipv4}),`
+
+  let mp_list = []
+  runCommands([`multipass list`], function(mp_list) {
+
+    const mp_inventory = mpListAsObject(mp_list)
+
+    let mp_list_string = ''
+    mp_inventory.forEach((item, index) => {
+      mp_list_string += `${item.name}(${item.ipv4})`
+      if (index != mp_inventory.length -1 ) mp_list_string += `, `
+    })
+
+    let ansible_inventory = []
+    mp_inventory.forEach((vm, index) => {
+      ansible_inventory.push(`ubuntu@${vm.ipv4}`)
+    })
+
+    mutateDiscover(mp_list_string)
+    mutateStatus(ansible_inventory)
+    mutateAnsibleInventory(ansible_inventory)
+    gMultiPassListArray = mp_inventory
   })
-
-  ansible_inventory = [];
-  mp_list_array.forEach(vm => {
-    ansible_inventory.push(` ubuntu@${vm.ipv4}`)
-  });
-
-  ansible_inventory += ','
-  mutateDiscover(mp_list_string);
-  mutateStatus(ansible_inventory);
 };
 
 
 btnCreateVM.onclick = (e) => {
-  targetVM.name = txtCreateVM.value;
-  const createCmd =
-    `multipass launch --disk 4G --mem 512m --cpus 1 --name ${targetVM.name}`;
+  const cmd =
+    `multipass launch --disk 4G --mem 512m --cpus 1 --name ${txtCreateVM.value}`
 
-  txtOutput.innerHTML = `Please wait, while we run the command: ${createCmd}`;
-  const ssh = exec(createCmd, (error, stdout, stderr) => {
-      if (error) { txtOutput.innerHTML = error }
-      if (stderr) { txtOutput.innerHTML = stderr }
-      if (stdout) { txtOutput.innerHTML = stdout }
-  });
-
-  ssh.on('exit', (code) => {
-    console.log(`Completed: ${createCmd}`)
+  mutateStatus(`Please wait, while we run the command: ${cmd}`)
+  runCommands([cmd], function(stdout ) {
+    mutateStatus(`Result: ${stdout}`)
   })
 };
 
+
 btnSetupVM.onclick = (e) => {
-  mpCopySshKey();
-}
 
-function mpCopySshKey(){
-  mp_list_array.forEach(vm => {  
-    const cmd = `multipass copy-files ~/.ssh/id_rsa.pub ${vm.name}:/home/ubuntu/.ssh/new_key`;
-    console.log(cmd);
-    const mp_copy = exec(cmd, (error, stdout, stderr) => {
-      if (error) { txtOutput.innerHTML = `error: ${error}` }
-      if (stderr) { txtOutput.innerHTML = `stderr: ${stderr}` }
-      if (stdout) { txtOutput.innerHTML = `stdout: ${stdout}` }
+  const mp_inventory = gMultiPassListArray
+  let cmdSequence = []
+
+  // Add Multipass commands for each machine that appears in the multipass list
+  mp_inventory.forEach(vm => {
+    cmdSequence.push(`multipass copy-files ~/.ssh/id_rsa.pub ${vm.name}:/home/ubuntu/.ssh/passible_key`)
+    cmdSequence.push(`multipass exec ${vm.name} -- cp -n /home/ubuntu/.ssh/authorized_keys /home/ubuntu/.ssh/original_key`)
+    cmdSequence.push(`multipass exec ${vm.name} -- cp /home/ubuntu/.ssh/original_key /home/ubuntu/.ssh/authorized_keys`)
+    cmdSequence.push(`multipass exec ${vm.name} -- sed -i '$r /home/ubuntu/.ssh/passible_key' /home/ubuntu/.ssh/authorized_keys`)
+  })
+
+  // Add an ansible inventory
+  let ansible_inventory = gAnsibleInventoryString
+
+  // Setup hostnames across the inventory using ansible as the last command
+  cmdSequence.push(`env ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i '${ansible_inventory},' -e '{"ansible_python_interpreter":"/usr/bin/python3"}' ${__dirname + '/playbooks/hostnames.ansible'}`)
+
+  const result = runCommands(cmdSequence, function(stdout) {
+    const ENV = 'env ANSIBLE_HOST_KEY_CHECKING=false'
+    const playbook = __dirname + '/playbooks/hostnames.ansible'
+    const extras = '{"ansible_python_interpreter":"/usr/bin/python3"}'
+    const cmd = `${ENV} ansible-playbook -i '${ansible_inventory}' -e ${extras} ${playbook}`
+
+    mutateStatus(`Please wait, while we run the command: ${cmd}`)
+    runCommands([cmd], function(output) {
+      console.info('Hostnames configured via ansible')
     })
-
-    mp_copy.on('exit', (code) => {
-      console.log(`Copy command finished with code: ${code}`)
-    })
-
-  });
-
-  mpModifyAuthorizeKeys();
-}
-
-function mpModifyAuthorizeKeys(){
-  mp_list_array.forEach(vm => {
-
-    const sed = exec(`multipass exec ${vm.name} -- sed -i '$r /home/ubuntu/.ssh/new_key' /home/ubuntu/.ssh/authorized_keys`, (error, stdout, stderr) => {
-      if (error) { txtOutput.innerHTML = `error: ${error}` }
-      if (stderr) { txtOutput.innerHTML = `stderr: ${stderr}` }
-      if (stdout) { txtOutput.innerHTML = `stdout: ${stdout}` }
-    })
-      
-    sed.on('exit', (code) => {
-      console.log(`sed command finished with code: ${code}`)
-    })
-
-  });
-
-  apHostnames();
-}
-
-function apHostnames() {
-
-  const ENV = 'env ANSIBLE_HOST_KEY_CHECKING=false';
-  const playbook = __dirname + '/playbooks/hostnames.ansible';
-  const extras = '{"ansible_python_interpreter":"/usr/bin/python3"}';
-  const cmd = `${ENV} ansible-playbook -i '${ansible_inventory}' -e ${extras} ${playbook}`;
-
-  txtOutput.innerHTML = `Please wait, while we run the command: ${cmd}`;
-  
-  const ansible = exec(cmd, (error, stdout, stderr) => {
-    if (error) { txtOutput.innerHTML = `error: ${error}` }
-    if (stderr) { txtOutput.innerHTML = `stderr: ${stderr}` }
-    if (stdout) { txtOutput.innerHTML = `stdout: ${stdout}`; }
-  });
-  
-  ansible.on('exit', (code) => {
-    console.log(`ansible exit code: ${code}`);
   })
 
 }
 
+
 btnConfigureVM.onclick = (e) => {
+  let targetVM = {}
   targetVM.name = txtCreateVM.value
-  targetVM.ipv4 = mp_list_array.map(function(vm) { 
+  targetVM.ipv4 = gMultiPassListArray.map((vm) => {
     if( targetVM.name === vm.name) return vm.ipv4
     if( targetVM.name != vm.name) return '0.0.0.0'
   });
-  targetVM.ipv4 = targetVM.ipv4.find(ip => ip != '0.0.0.0');
+  targetVM.ipv4 = targetVM.ipv4.find(ip => ip != '0.0.0.0')
 
-  const ENV = 'env ANSIBLE_HOST_KEY_CHECKING=false';
-  const playbook = __dirname + '/playbooks/mongo-appdb.ansible';
-  const extras = '{"ansible_python_interpreter":"/usr/bin/python3"}';
-  const cmd = `${ENV} ansible-playbook -i 'ubuntu@${targetVM.ipv4},' -e ${extras} ${playbook}`;
+  const ENV = 'env ANSIBLE_HOST_KEY_CHECKING=false'
+  const playbook = __dirname + '/playbooks/mongo-appdb.ansible'
+  const extras = '{"ansible_python_interpreter":"/usr/bin/python3"}'
+  const cmd = `${ENV} ansible-playbook -i 'ubuntu@${targetVM.ipv4},' -e ${extras} ${playbook}`
 
-  txtOutput.innerHTML = `Please wait, while we run the command: ${cmd}`;
-  
-  const ansible = exec(cmd, (error, stdout, stderr) => {
-    if (error) { txtOutput.innerHTML = `error: ${error}` }
-    if (stderr) { txtOutput.innerHTML = `stderr: ${stderr}` }
-    if (stdout) { txtOutput.innerHTML = `stdout: ${stdout}`; }
-  });
-  
-  ansible.on('exit', (code) => {
-    console.log(`ansible exit code: ${code}`);
+  mutateStatus(`Please wait, while we run the command: ${cmd}`)
+  runCommands([cmd], function(output) {
+    console.info(`MongoDB installed via ansible on ${targetVM.name}`)
   })
-
 }
 
+
 btnDeleteVM.onclick = (e) => {
-  
-  const deleteCmd = `multipass delete -p ${txtCreateVM.value}`;
-  
-  const ssh = exec(deleteCmd, (error, stdout, stderr) => {
-    if (error) { txtOutput.innerHTML = `error: ${error.message}` }
-    if (stderr) { txtOutput.innerHTML = `stderr: ${stderr}` }
-    if (stdout) { txtOutput.innerHTML = `done: ${stdout}`; }
-  });
-
-  ssh.on('exit', (code) => {
-    setTimeout(function(){ console.log("Pausing for Delete"); }, 5000);
-    btnDiscoverVM.onclick();
+  const cmd = `multipass delete -p ${txtCreateVM.value}`
+  runCommands([cmd], function(stdout) {
+    console.info(`Deleted VM with the name: ${txtCreateVM.value}`)
   })
-
 }
