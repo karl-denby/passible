@@ -24,7 +24,7 @@ multiPass and ansIble in one handy tool: **passible**
 ## Releases
 
 ### 0.2.0 - Unreleased
-- Refactor code sequencing commands to make more reliable/resuable
+- Refactor code sequencing commands to make more reliable/resuable [done]
 - Add typescript
 - Add vue.js
 - Upgrade to Electron 9
@@ -36,7 +36,7 @@ multiPass and ansIble in one handy tool: **passible**
 - Uses `ansible-playbook` to setup `/etc/hosts` access between VM's
 - Configure button deploys a playbook to install MongoDB community to a named VM
 - Delete button will delete and purge the named machine
-- Known issue: Discover sometimes returns nothing on the first click, a second click returns expected result 
+- Known issue: Discover sometimes returns nothing on the first click, a second click returns expected result
 
 ### 0.0.1 - Initial POC code
 
