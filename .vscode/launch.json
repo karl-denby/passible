@@ -1,6 +1,15 @@
 {
   "version": "0.2.0",
   "configurations": [
+  {
+    "name": "Launch play",
+    "program": "${workspaceFolder}/src/play.js",
+    "request": "launch",
+    "skipFiles": [
+      "<node_internals>/**"
+    ],
+    "type": "pwa-node"
+  },
     {
       "name": "Debug Main Process",
       "type": "node",
