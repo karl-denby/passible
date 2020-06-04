@@ -47,13 +47,13 @@ function mpListAsObject(out) {
     var data = [];
     txt_lines.forEach(function (line) {
         line = line.replace(/\s+/g, ' ');
-        line = line.split(" ");
-        if ((line[0] != '' && line[0] != 'Name' && line[0] != "No")) {
+        var lineComponents = line.split(" ");
+        if ((lineComponents[0] != '' && lineComponents[0] != 'Name' && lineComponents[0] != "No")) {
             data.push({
-                "name": line[0],
-                "state": line[1],
-                "ipv4": line[2],
-                "image": line[3]
+                "name": lineComponents[0],
+                "state": lineComponents[1],
+                "ipv4": lineComponents[2],
+                "image": lineComponents[3]
             });
         }
     });
@@ -74,13 +74,14 @@ btnDiscoverVM.onclick = function (e) {
             ansible_inventory.push("ubuntu@" + vm.ipv4);
         });
         mutateDiscover(mp_list_string);
-        mutateStatus(ansible_inventory);
-        mutateAnsibleInventory(ansible_inventory);
+        mutateStatus(ansible_inventory.toString());
+        mutateAnsibleInventory(ansible_inventory.join());
         gMultiPassListArray = mp_inventory;
     });
 };
 btnCreateVM.onclick = function (e) {
-    var cmd = "multipass launch --disk 4G --mem 512m --cpus 1 --name " + txtCreateVM.value;
+    var txtCreateVM = document.getElementById("txtCreateVM").value;
+    var cmd = "multipass launch --disk 4G --mem 512m --cpus 1 --name " + txtCreateVM;
     mutateStatus("Please wait, while we run the command: " + cmd);
     runCommands([cmd], function (stdout) {
         mutateStatus("Result: " + stdout);
@@ -89,12 +90,13 @@ btnCreateVM.onclick = function (e) {
 btnSetupVM.onclick = function (e) {
     var mp_inventory = gMultiPassListArray;
     var cmdSequence = [];
-    mp_inventory.forEach(function (vm) {
+    for (var _i = 0, mp_inventory_1 = mp_inventory; _i < mp_inventory_1.length; _i++) {
+        var vm = mp_inventory_1[_i];
         cmdSequence.push("multipass copy-files ~/.ssh/id_rsa.pub " + vm.name + ":/home/ubuntu/.ssh/passible_key");
         cmdSequence.push("multipass exec " + vm.name + " -- cp -n /home/ubuntu/.ssh/authorized_keys /home/ubuntu/.ssh/original_key");
         cmdSequence.push("multipass exec " + vm.name + " -- cp /home/ubuntu/.ssh/original_key /home/ubuntu/.ssh/authorized_keys");
         cmdSequence.push("multipass exec " + vm.name + " -- sed -i '$r /home/ubuntu/.ssh/passible_key' /home/ubuntu/.ssh/authorized_keys");
-    });
+    }
     var ansible_inventory = gAnsibleInventoryString;
     cmdSequence.push("env ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i '" + ansible_inventory + ",' -e '{\"ansible_python_interpreter\":\"/usr/bin/python3\"}' " + (__dirname + '/playbooks/hostnames.ansible'));
     var result = runCommands(cmdSequence, function (stdout) {
@@ -110,7 +112,8 @@ btnSetupVM.onclick = function (e) {
 };
 btnConfigureVM.onclick = function (e) {
     var targetVM = {};
-    targetVM.name = txtCreateVM.value;
+    var txtCreateVM = document.getElementById("txtCreateVM").value;
+    targetVM.name = txtCreateVM;
     targetVM.ipv4 = gMultiPassListArray.map(function (vm) {
         if (targetVM.name === vm.name)
             return vm.ipv4;
@@ -128,9 +131,10 @@ btnConfigureVM.onclick = function (e) {
     });
 };
 btnDeleteVM.onclick = function (e) {
-    var cmd = "multipass delete -p " + txtCreateVM.value;
+    var txtCreateVM = document.getElementById("txtCreateVM").value;
+    var cmd = "multipass delete -p " + txtCreateVM;
     runCommands([cmd], function (stdout) {
-        console.info("Deleted VM with the name: " + txtCreateVM.value);
+        console.info("Deleted VM with the name: " + txtCreateVM);
     });
 };
 //# sourceMappingURL=render.js.map
