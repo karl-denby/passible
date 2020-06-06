@@ -26,8 +26,8 @@ multiPass and ansIble in one handy tool: **passible**
 ### 0.2.0 - Unreleased
 - Refactor code sequencing commands to make more reliable/resuable [done]
 - Add typescript [done]
+- Upgrade to Electron 9 [done]
 - Add vue.js
-- Upgrade to Electron 9
 
 ### 0.1.0 - 24/5/2020
 - Can create VM's
