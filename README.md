@@ -5,6 +5,8 @@ multiPass and ansIble in one handy tool: **passible**
 
 ## Install the dependencies and run
 - npm install
+- npm css-build
+- tsc
 - npm start
 
 ## Other requirements

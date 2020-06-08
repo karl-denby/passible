@@ -1,7 +1,7 @@
 {
   "name": "passible",
   "productName": "passible",
-  "version": "0.1.1",
+  "version": "0.1.9",
   "description": "multiPass and Ansible deployment tool, create VMs(multipass/cloud-init) and configure them (Ansible)",
   "main": "src/index.js",
   "scripts": {
@@ -25,24 +25,7 @@
       "packagerConfig": {},
       "makers": [
         {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "ifbackwards"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ]
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
-          "config": {}
+          "name": "@electron-forge/maker-zip"
         }
       ]
     }

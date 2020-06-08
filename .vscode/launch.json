@@ -1,15 +1,6 @@
 {
   "version": "0.2.0",
   "configurations": [
-  {
-    "name": "Launch play",
-    "program": "${workspaceFolder}/src/play.js",
-    "request": "launch",
-    "skipFiles": [
-      "<node_internals>/**"
-    ],
-    "type": "pwa-node"
-  },
     {
       "name": "Debug Main Process",
       "type": "node",
@@ -21,20 +12,6 @@
       },
       "program": "${workspaceRoot}/src/index.js",
       "protocol": "inspector"
-    },
-    {
-      "name": "Debug Renderer Process",
-      "type": "chrome",
-      "request": "launch",
-      "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron",
-      "windows": {
-        "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron.cmd"
-      },
-      "runtimeArgs": [
-        "${workspaceRoot}/src/render.js",
-        "--remote-debugging-port=9222"
-      ],
-      "webRoot": "${workspaceRoot}"
     }
   ]
 }

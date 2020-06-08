@@ -8,7 +8,8 @@ var createWindow = function () {
         width: 1280,
         height: 720,
         webPreferences: {
-            nodeIntegration: true
+            nodeIntegration: true,
+            enableRemoteModule: true
         }
     });
     mainWindow.loadFile(path.join(__dirname, 'index.html'));
