@@ -12,7 +12,9 @@ var txtOutput = document.getElementById("txtOutput");
 var gMultiPassListArray = [];
 var gAnsibleInventoryString = '';
 function runCommands(commands, callback) {
-    !commands ? console.error('no command sequence provided') : console.info("Running: " + commands[0]);
+    !commands
+        ? console.error('no command sequence provided')
+        : console.info("Running: " + commands[0]);
     var cmd = exec(commands[0], function (error, stdout, stderr) {
         if (error && commands.length === 1) {
             callback(error);
@@ -81,7 +83,10 @@ btnDiscoverVM.onclick = function (e) {
 };
 btnCreateVM.onclick = function (e) {
     var txtCreateVM = document.getElementById("txtCreateVM").value;
-    var cmd = "multipass launch --disk 4G --mem 512m --cpus 1 --name " + txtCreateVM;
+    var selProc = document.getElementById("selProc").value;
+    var selMemory = document.getElementById("selMemory").value;
+    var selDisk = document.getElementById("selDisk").value;
+    var cmd = "multipass launch --disk " + selDisk + " --mem " + selMemory + " --cpus " + selProc + " --name " + txtCreateVM;
     mutateStatus("Please wait, while we run the command: " + cmd);
     runCommands([cmd], function (stdout) {
         mutateStatus("Result: " + stdout);

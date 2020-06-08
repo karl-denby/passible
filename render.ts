@@ -18,7 +18,9 @@ let gAnsibleInventoryString: string = ''
 
 // --- --- --- Main --- --- ---
 function runCommands(commands: string[], callback: any) {
-  !commands ? console.error('no command sequence provided') : console.info(`Running: ${commands[0]}`)
+  !commands 
+  ? console.error('no command sequence provided') 
+  : console.info(`Running: ${commands[0]}`)
 
   // Run command[0] if its the last/only in the list invoke callback to deal with results
   const cmd = exec(commands[0], (error: string, stdout: string, stderr: string) => {
@@ -101,10 +103,11 @@ btnDiscoverVM.onclick = (e) => {
 btnCreateVM.onclick = (e) => {
 
   const txtCreateVM = (document.getElementById("txtCreateVM") as HTMLInputElement).value
+  const selProc = (document.getElementById("selProc") as HTMLInputElement).value
   const selMemory = (document.getElementById("selMemory") as HTMLInputElement).value
-
+  const selDisk = (document.getElementById("selDisk") as HTMLInputElement).value
   const cmd =
-    `multipass launch --disk 4G --mem ${selMemory} --cpus 1 --name ${txtCreateVM}`
+    `multipass launch --disk ${selDisk} --mem ${selMemory} --cpus ${selProc} --name ${txtCreateVM}`
 
   mutateStatus(`Please wait, while we run the command: ${cmd}`)
   runCommands([cmd], function(stdout: string ) {
