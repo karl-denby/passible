@@ -10,41 +10,52 @@
   </head>
   <body>
     <div class="box">
+
       <h1 class="title">Passible</h1>
-      <strong>Proof of Concept:</strong>
-      <ul>
-         <li>Discover multipass VMs works</li>
-         <li>Setup VMs for ssh and hostname access works</li>
-         <li>Create VM via multipass works</li>
-         <li>Configure VM (mongodb) via ansible works</li>
-         <li>Delete VM via multipass works</li>
-      </ul>
-      <p class="box">
-        Platform is: <b><script>document.write(process.platform)</script></b>
-      </p>
-      <div>
+      <div class="box">
         <button id="btnDiscoverVM" class="button is-primary is-rounded is-one-half" type="button">Discover</button>
         <button id="btnSetupVM" class="button is-primary is-rounded is-one-half" type="button">Setup</button>
         <p id="txtListVM">Discovered VMs: </p>
-        <br>
       </div>
-      <div class="columns">
-        <button id="btnCreateVM" class="button is-primary is-rounded column is-one-quarter" type="button">Create</button>
-        <input id="txtCreateVM" class="input is-primary column is-one-quarter" type="input">
+      
+      <div class="box">
+        <div class="columns">
+          <button id="btnCreateVM" class="button is-primary column is-one-fifth" type="button">Create</button>
+          <input id="txtCreateVM" class="input is-primary column is-one-fifth" type="input">
           <div class="select">
-            <select name="selMemory" id="selMemory" >
-              <option value="512M">512Mb</option>
-              <option value="1G">1024Mb</option>
-              <option value="4G">4096Mb</option>
+            <select name="selProc" id="selProc">
+              <option value="1">1 vCPU</option>
+              <option value="2">2 vCPU</option>
+              <option value="4">4 vCPU</option>
             </select>
           </div>
-        <button id="btnConfigureVM" class="button is-primary is-rounded column is-one-quarter" type="button">Configure</button>
-        <button id="btnDeleteVM" class="button is-primary is-rounded column is-one-quarter" type="button">Delete</button>
+          <div class="select">
+            <select name="selMemory" id="selMemory">
+              <option value="512M">512Mb RAM</option>
+              <option value="1G">1G RAM</option>
+              <option value="4G">4G RAM</option>
+            </select>
+          </div>
+          <div class="select">
+            <select name="selDisk" id="selDisk">
+              <option value="4G">4G Disk</option>
+              <option value="8G">8G Disk</option>
+              <option value="16G">16G Disk</option>
+            </select>
+          </div>
+          <button id="btnDeleteVM" class="button is-primary column is-one-fifth" type="button">Delete</button>
+        </div>
       </div>
-      <p id="txtOutput" class="notification">Command output will appear here...</p>
-      We are using node <script>document.write(process.versions.node)</script>,
-      Chrome <script>document.write(process.versions.chrome)</script>,
-      and Electron <script>document.write(process.versions.electron)</script>.
+
+      <div class="box">
+        <button id="btnConfigureVM" class="button is-primary is-rounded column is-one-fifth" type="button">Configure</button>
+        <p id="txtOutput" class="notification">Command output will appear here...</p>
+        We are using <script>document.write(process.platform)</script> with,
+        Node.js <script>document.write(process.versions.node)</script>,
+        Chrome <script>document.write(process.versions.chrome)</script>,
+        and Electron <script>document.write(process.versions.electron)</script>.
+      </div>
+
     </div>
   </body>
 </html>
