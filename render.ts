@@ -45,9 +45,11 @@ function mutateDiscover(message: string) {
   txtListVM.innerHTML = message
 }
 
+
 function mutateAnsibleInventory(message: string) {
   gAnsibleInventoryString = message
 }
+
 
 function mpListAsObject(out: string) {
   const txt_lines: string[] = out.split("\n")
@@ -99,8 +101,10 @@ btnDiscoverVM.onclick = (e) => {
 btnCreateVM.onclick = (e) => {
 
   const txtCreateVM = (document.getElementById("txtCreateVM") as HTMLInputElement).value
+  const selMemory = (document.getElementById("selMemory") as HTMLInputElement).value
+
   const cmd =
-    `multipass launch --disk 4G --mem 512m --cpus 1 --name ${txtCreateVM}`
+    `multipass launch --disk 4G --mem ${selMemory} --cpus 1 --name ${txtCreateVM}`
 
   mutateStatus(`Please wait, while we run the command: ${cmd}`)
   runCommands([cmd], function(stdout: string ) {
