@@ -3,7 +3,6 @@ var dialog = remote.dialog, Menu = remote.Menu;
 var exec = require("child_process").exec;
 var btnDiscoverVM = document.getElementById("btnDiscoverVM");
 var btnSetupVM = document.getElementById("btnSetupVM");
-var txtListVM = document.getElementById("txtListVM");
 var btnCreateVM = document.getElementById("btnCreateVM");
 var txtCreateVM = document.getElementById("txtCreateVM");
 var btnConfigureVM = document.getElementById("btnConfigureVM");
@@ -39,7 +38,9 @@ function mutateStatus(message) {
     txtOutput.innerHTML = message + ',';
 }
 function mutateDiscover(message) {
-    txtListVM.innerHTML = message;
+    var output = document.getElementById("txtListVM");
+    console.log(output.value);
+    output.value = "Discovered: " + message;
 }
 function mutateAnsibleInventory(message) {
     gAnsibleInventoryString = message;

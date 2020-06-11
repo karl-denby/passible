@@ -9,13 +9,19 @@
     <script defer src="render.js"></script>
   </head>
   <body>
+  
     <div class="box">
-
-      <h1 class="title">Passible</h1>
+  
       <div class="box">
-        <button id="btnDiscoverVM" class="button is-primary is-rounded is-one-half" type="button">Discover</button>
-        <button id="btnSetupVM" class="button is-primary is-rounded is-one-half" type="button">Setup</button>
-        <p id="txtListVM">Discovered VMs: </p>
+        <div class="columns">
+          <button id="btnDiscoverVM" class="button is-primary is-rounded column is-one-fifth" type="button">Discover</button>
+          <div class="field">
+            <div class="control">
+              <input id="txtListVM" class="input is-primary column" type="text" placeholder="Discovered VMs">
+            </div>
+          </div>
+          <button id="btnSetupVM" class="button is-primary is-rounded column is-one-fifth" type="button">Setup</button>
+        </div>
       </div>
       
       <div class="box">

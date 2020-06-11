@@ -5,7 +5,7 @@ const { exec } = require("child_process")
 // UI Elements
 const btnDiscoverVM = document.getElementById("btnDiscoverVM")
 const btnSetupVM = document.getElementById("btnSetupVM")
-const txtListVM = document.getElementById("txtListVM")
+//const txtListVM = document.getElementById("txtListVM") as HTMLInputElement
 const btnCreateVM = document.getElementById("btnCreateVM")
 const txtCreateVM = document.getElementById("txtCreateVM")
 const btnConfigureVM = document.getElementById("btnConfigureVM")
@@ -43,8 +43,9 @@ function mutateStatus(message: string) {
   txtOutput.innerHTML = message + ','
 }
 
+
 function mutateDiscover(message: string) {
-  txtListVM.innerHTML = message
+  (<HTMLInputElement>document.getElementById("txtListVM")).value = message
 }
 
 
