@@ -140,9 +140,9 @@ btnSetupVM.onclick = (e) => {
   cmdSequence.push(`env ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i '${ansible_inventory},' -e '{"ansible_python_interpreter":"/usr/bin/python3"}' ${__dirname + '/playbooks/hostnames.ansible'}`)
 
   const result = runCommands(cmdSequence, function(stdout: string) {
-    const ENV = 'env ANSIBLE_HOST_KEY_CHECKING=false'
-    const playbook = __dirname + '/playbooks/hostnames.ansible'
-    const extras = '{"ansible_python_interpreter":"/usr/bin/python3"}'
+    const ENV = `env ANSIBLE_HOST_KEY_CHECKING=false`
+    const playbook = `${__dirname}/playbooks/hostnames.ansible`
+    const extras = `{"ansible_python_interpreter":"/usr/bin/python3"}`
     const cmd = `${ENV} ansible-playbook -i '${ansible_inventory}' -e ${extras} ${playbook}`
 
     mutateStatus(`Please wait, while we run the command: ${cmd}`)
@@ -162,6 +162,7 @@ btnConfigureVM.onclick = (e) => {
 
   let targetVM: any = {}
   const txtCreateVM = (document.getElementById("txtCreateVM") as HTMLInputElement).value
+  const ansiblePlan = (document.getElementById("selPlan") as HTMLInputElement).value
 
   targetVM.name = txtCreateVM
   targetVM.ipv4 = gMultiPassListArray.map((vm: any) => {
@@ -170,9 +171,9 @@ btnConfigureVM.onclick = (e) => {
   });
   targetVM.ipv4 = targetVM.ipv4.find((ip: string) => ip != '0.0.0.0')
 
-  const ENV = 'env ANSIBLE_HOST_KEY_CHECKING=false'
-  const playbook = __dirname + '/playbooks/mongo-appdb.ansible'
-  const extras = '{"ansible_python_interpreter":"/usr/bin/python3"}'
+  const ENV = `env ANSIBLE_HOST_KEY_CHECKING=false`
+  const playbook = `${__dirname}/playbooks/${ansiblePlan}`
+  const extras = `{"ansible_python_interpreter":"/usr/bin/python3"}`
   const cmd = `${ENV} ansible-playbook -i 'ubuntu@${targetVM.ipv4},' -e ${extras} ${playbook}`
 
   mutateStatus(`Please wait, while we run the command: ${cmd}`)

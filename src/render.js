@@ -38,9 +38,7 @@ function mutateStatus(message) {
     txtOutput.innerHTML = message + ',';
 }
 function mutateDiscover(message) {
-    var output = document.getElementById("txtListVM");
-    console.log(output.value);
-    output.value = "Discovered: " + message;
+    document.getElementById("txtListVM").value = message;
 }
 function mutateAnsibleInventory(message) {
     gAnsibleInventoryString = message;
@@ -106,9 +104,9 @@ btnSetupVM.onclick = function (e) {
     var ansible_inventory = gAnsibleInventoryString;
     cmdSequence.push("env ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i '" + ansible_inventory + ",' -e '{\"ansible_python_interpreter\":\"/usr/bin/python3\"}' " + (__dirname + '/playbooks/hostnames.ansible'));
     var result = runCommands(cmdSequence, function (stdout) {
-        var ENV = 'env ANSIBLE_HOST_KEY_CHECKING=false';
-        var playbook = __dirname + '/playbooks/hostnames.ansible';
-        var extras = '{"ansible_python_interpreter":"/usr/bin/python3"}';
+        var ENV = "env ANSIBLE_HOST_KEY_CHECKING=false";
+        var playbook = __dirname + "/playbooks/hostnames.ansible";
+        var extras = "{\"ansible_python_interpreter\":\"/usr/bin/python3\"}";
         var cmd = ENV + " ansible-playbook -i '" + ansible_inventory + "' -e " + extras + " " + playbook;
         mutateStatus("Please wait, while we run the command: " + cmd);
         runCommands([cmd], function (output) {
@@ -119,6 +117,7 @@ btnSetupVM.onclick = function (e) {
 btnConfigureVM.onclick = function (e) {
     var targetVM = {};
     var txtCreateVM = document.getElementById("txtCreateVM").value;
+    var ansiblePlan = document.getElementById("selPlan").value;
     targetVM.name = txtCreateVM;
     targetVM.ipv4 = gMultiPassListArray.map(function (vm) {
         if (targetVM.name === vm.name)
@@ -127,9 +126,9 @@ btnConfigureVM.onclick = function (e) {
             return '0.0.0.0';
     });
     targetVM.ipv4 = targetVM.ipv4.find(function (ip) { return ip != '0.0.0.0'; });
-    var ENV = 'env ANSIBLE_HOST_KEY_CHECKING=false';
-    var playbook = __dirname + '/playbooks/mongo-appdb.ansible';
-    var extras = '{"ansible_python_interpreter":"/usr/bin/python3"}';
+    var ENV = "env ANSIBLE_HOST_KEY_CHECKING=false";
+    var playbook = __dirname + "/playbooks/" + ansiblePlan;
+    var extras = "{\"ansible_python_interpreter\":\"/usr/bin/python3\"}";
     var cmd = ENV + " ansible-playbook -i 'ubuntu@" + targetVM.ipv4 + ",' -e " + extras + " " + playbook;
     mutateStatus("Please wait, while we run the command: " + cmd);
     runCommands([cmd], function (output) {
