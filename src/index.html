@@ -14,20 +14,16 @@
   
       <div class="box">
         <div class="columns">
-          <button id="btnDiscoverVM" class="button is-primary is-rounded column is-one-fifth" type="button">Discover</button>
-          <div class="field">
-            <div class="control">
-              <input id="txtListVM" class="input is-primary column" type="text" placeholder="Discovered VMs">
-            </div>
-          </div>
-          <button id="btnSetupVM" class="button is-primary is-rounded column is-one-fifth" type="button">Setup</button>
+          <button id="btnDiscoverVM" class="button is-primary column is-one-fifth" type="button">Discover</button>
+          <input id="txtListVM" class="input is-primary column is-three-fifths" type="text" placeholder="Discovered VMs">
+          <button id="btnSetupVM" class="button is-primary column is-one-fifth" type="button">Setup</button>
         </div>
       </div>
       
       <div class="box">
         <div class="columns">
           <button id="btnCreateVM" class="button is-primary column is-one-fifth" type="button">Create</button>
-          <input id="txtCreateVM" class="input is-primary column is-one-fifth" type="input">
+          <input id="txtCreateVM" class="input is-primary column is-one-fifth" type="text" placeholder="Hostname">
           <div class="select">
             <select name="selProc" id="selProc">
               <option value="1">1 vCPU</option>
@@ -54,14 +50,20 @@
       </div>
 
       <div class="box">
-        <button id="btnConfigureVM" class="button is-primary is-rounded column is-one-fifth" type="button">Configure</button>
-        <p id="txtOutput" class="notification">Command output will appear here...</p>
-        We are using <script>document.write(process.platform)</script> with,
-        Node.js <script>document.write(process.versions.node)</script>,
-        Chrome <script>document.write(process.versions.chrome)</script>,
-        and Electron <script>document.write(process.versions.electron)</script>.
+      <div class="columns">
+        <div class="select">
+          <select name="selPlan" id="selPlan">
+            <option value="mongod-community-offcial.ansible">MongoDB Community (Official Repo)</option>
+            <option value="mongod-enterprise-official.ansible">MongoDB Enterprise (Official Repo)</option>
+          </select>
+        </div>
+        <button id="btnConfigureVM" class="button is-primary column is-one-fifth" type="button">Configure</button>
       </div>
-
+      <p id="txtOutput" class="notification">Command output will appear here...</p>
+      We are using <script>document.write(process.platform)</script> with,
+      Node.js <script>document.write(process.versions.node)</script>,
+      Chrome <script>document.write(process.versions.chrome)</script>,
+      and Electron <script>document.write(process.versions.electron)</script>.
     </div>
   </body>
 </html>
