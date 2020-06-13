@@ -13,7 +13,6 @@
       update_cache: yes
     vars:
       packages:
-          - libcurl3
           - libcurl3-gnutls
           - libcurl4
           - libgssapi-krb5-2
@@ -30,21 +29,21 @@
     become: yes
     become_user: root
     apt_key:
-      url: https://www.mongodb.org/static/pgp/server-4.2.asc
+      url: https://www.mongodb.org/static/pgp/server-4.4.asc
       state: present
     with_items: "{{groups['all']}}"
 
-  - name: add apt repository
+  - name: add apt repositorylist
     become: yes
     become_user: root
     apt_repository:
-      repo: "deb [ arch=amd64,arm64,s390x ] http://repo.mongodb.com/apt/ubuntu bionic/mongodb-enterprise/4.2 multiverse"
+      repo: "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/development multiverse"
       state: present
-      filename: mongodb-enerprise.list
+      filename: mongodb-org-4.4
       update_cache: yes
     with_items: "{{groups['all']}}"
 
-  - name: install mongodb-enterprise
+  - name: install mongodb-org
     become: yes
     become_user: root
     apt:
@@ -53,7 +52,7 @@
       update_cache: yes
     vars:
       packages:
-          - mongodb-enterprise
+          - mongodb-org
     with_items: "{{groups['all']}}"
 
   - name: "Enable mongod service"
