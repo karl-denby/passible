@@ -59,12 +59,6 @@
           - mongodb-org-server
     with_items: "{{groups['all']}}"
 
-  - name: "Create dbpath for Application Database via apt"
-    become: yes
-    become_user: root
-    file: path=/data/appdb state=directory mode=0755 owner=mongodb group=mongodb
-    with_items: "{{groups['all']}}"
-
   - name: "Enable mongod service"
     become: yes
     become_user: root
@@ -73,7 +67,7 @@
       enabled: yes
     with_items: "{{groups['all']}}"
 
-  - name: "Start mongod for the Application Database"
+  - name: "Start mongod"
     become: yes
     become_user: root
     service: name=mongod state=started

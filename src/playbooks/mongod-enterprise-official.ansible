@@ -38,13 +38,13 @@
     become: yes
     become_user: root
     apt_repository:
-      repo: "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.2 multiverse"
+      repo: "deb [ arch=amd64,arm64,s390x ] http://repo.mongodb.com/apt/ubuntu bionic/mongodb-enterprise/4.2 multiverse"
       state: present
-      filename: mongodb-org-4.2.list
+      filename: mongodb-enerprise.list
       update_cache: yes
     with_items: "{{groups['all']}}"
 
-  - name: install mongodb-org
+  - name: install mongodb-enterprise
     become: yes
     become_user: root
     apt:
@@ -53,16 +53,7 @@
       update_cache: yes
     vars:
       packages:
-          - mongodb-org
-          - mongodb-org-shell
-          - mongodb-org-mongos
-          - mongodb-org-server
-    with_items: "{{groups['all']}}"
-
-  - name: "Create dbpath for Application Database via apt"
-    become: yes
-    become_user: root
-    file: path=/data/appdb state=directory mode=0755 owner=mongodb group=mongodb
+          - mongodb-enterprise
     with_items: "{{groups['all']}}"
 
   - name: "Enable mongod service"
@@ -73,7 +64,7 @@
       enabled: yes
     with_items: "{{groups['all']}}"
 
-  - name: "Start mongod for the Application Database"
+  - name: "Start mongod"
     become: yes
     become_user: root
     service: name=mongod state=started
