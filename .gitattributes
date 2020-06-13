@@ -1,2 +1,2 @@
-src/css/mystyle.css linguist-vendored
-src/sass/mystyle.scss linguist-vendored
+*.css linguist-vendored
+*.scss linguist-vendored
