@@ -137,11 +137,11 @@ btnSetupVM.onclick = (e) => {
   let ansible_inventory = gAnsibleInventoryString
 
   // Setup hostnames across the inventory using ansible as the last command
-  cmdSequence.push(`env ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i '${ansible_inventory},' -e '{"ansible_python_interpreter":"/usr/bin/python3"}' ${__dirname + '/playbooks/hostnames.ansible'}`)
+  cmdSequence.push(`env ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i '${ansible_inventory},' -e '{"ansible_python_interpreter":"/usr/bin/python3"}' ${__dirname + '/playbooks/hostnames.yaml'}`)
 
   const result = runCommands(cmdSequence, function(stdout: string) {
     const ENV = `env ANSIBLE_HOST_KEY_CHECKING=false`
-    const playbook = `${__dirname}/playbooks/hostnames.ansible`
+    const playbook = `${__dirname}/playbooks/hostnames.yaml`
     const extras = `{"ansible_python_interpreter":"/usr/bin/python3"}`
     const cmd = `${ENV} ansible-playbook -i '${ansible_inventory}' -e ${extras} ${playbook}`
 
