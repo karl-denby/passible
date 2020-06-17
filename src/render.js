@@ -102,10 +102,10 @@ btnSetupVM.onclick = function (e) {
         cmdSequence.push("multipass exec " + vm.name + " -- sed -i '$r /home/ubuntu/.ssh/passible_key' /home/ubuntu/.ssh/authorized_keys");
     }
     var ansible_inventory = gAnsibleInventoryString;
-    cmdSequence.push("env ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i '" + ansible_inventory + ",' -e '{\"ansible_python_interpreter\":\"/usr/bin/python3\"}' " + (__dirname + '/playbooks/hostnames.ansible'));
+    cmdSequence.push("env ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i '" + ansible_inventory + ",' -e '{\"ansible_python_interpreter\":\"/usr/bin/python3\"}' " + (__dirname + '/playbooks/hostnames.yaml'));
     var result = runCommands(cmdSequence, function (stdout) {
         var ENV = "env ANSIBLE_HOST_KEY_CHECKING=false";
-        var playbook = __dirname + "/playbooks/hostnames.ansible";
+        var playbook = __dirname + "/playbooks/hostnames.yaml";
         var extras = "{\"ansible_python_interpreter\":\"/usr/bin/python3\"}";
         var cmd = ENV + " ansible-playbook -i '" + ansible_inventory + "' -e " + extras + " " + playbook;
         mutateStatus("Please wait, while we run the command: " + cmd);
