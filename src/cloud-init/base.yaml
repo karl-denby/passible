@@ -1,0 +1,4 @@
+packages:
+  python3
+
+manage_etc_hosts: false

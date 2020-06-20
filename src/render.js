@@ -85,7 +85,7 @@ btnCreateVM.onclick = function (e) {
     var selProc = document.getElementById("selProc").value;
     var selMemory = document.getElementById("selMemory").value;
     var selDisk = document.getElementById("selDisk").value;
-    var cmd = "multipass launch --disk " + selDisk + " --mem " + selMemory + " --cpus " + selProc + " --name " + txtCreateVM;
+    var cmd = "multipass launch --disk " + selDisk + " --mem " + selMemory + " --cpus " + selProc + " --name " + txtCreateVM + " --cloud-init " + __dirname + "/cloud-init/base.yaml";
     mutateStatus("Please wait, while we run the command: " + cmd);
     runCommands([cmd], function (stdout) {
         mutateStatus("Result: " + stdout);

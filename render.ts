@@ -108,7 +108,7 @@ btnCreateVM.onclick = (e) => {
   const selMemory = (document.getElementById("selMemory") as HTMLInputElement).value
   const selDisk = (document.getElementById("selDisk") as HTMLInputElement).value
   const cmd =
-    `multipass launch --disk ${selDisk} --mem ${selMemory} --cpus ${selProc} --name ${txtCreateVM}`
+    `multipass launch --disk ${selDisk} --mem ${selMemory} --cpus ${selProc} --name ${txtCreateVM} --cloud-init ${__dirname}/cloud-init/base.yaml`
 
   mutateStatus(`Please wait, while we run the command: ${cmd}`)
   runCommands([cmd], function(stdout: string ) {
