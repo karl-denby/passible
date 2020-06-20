@@ -132,7 +132,7 @@ btnConfigureVM.onclick = function (e) {
     var cmd = ENV + " ansible-playbook -i 'ubuntu@" + targetVM.ipv4 + ",' -e " + extras + " " + playbook;
     mutateStatus("Please wait, while we run the command: " + cmd);
     runCommands([cmd], function (output) {
-        console.info("MongoDB installed via ansible on " + targetVM.name);
+        console.info("running playbook on " + targetVM.name);
     });
 };
 btnDeleteVM.onclick = function (e) {
