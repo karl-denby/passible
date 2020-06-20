@@ -1,0 +1,21 @@
+- name: Install rvm via bash script
+  hosts: all
+  gather_facts: yes
+  tasks:
+    - name: install gpg2
+      become: yes
+      become_user: root
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      vars:
+        packages:
+          - gnupg2  
+
+    - name: install gpg keys
+      shell: gpg2 --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+
+    - name: install gpg rvm
+      shell: curl -sSL https://get.rvm.io | bash -s stable
+     
