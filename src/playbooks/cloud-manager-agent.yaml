@@ -1,0 +1,26 @@
+---
+    - name: Install MongoDB Cloud/Ops Manager agent via .deb
+      hosts: all
+      gather_facts: yes
+      tasks:
+
+      - name: "Install Dependencies via apt"
+        become: yes
+        become_user: root
+        apt:
+          name: "{{ packages }}"
+          state: present
+          update_cache: yes
+        vars:
+          packages:
+              - libcurl3-gnutls
+              - libcurl4
+              - libgssapi-krb5-2
+              - libkrb5-dbg
+              - libldap-2.4-2
+              - libpci3
+              - libsasl2-2
+              - snmp
+              - openssl
+              - gnupg
+        with_items: "{{groups['all']}}"
