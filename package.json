@@ -25,12 +25,20 @@
       "packagerConfig": {},
       "makers": [
         {
-          "name": "@electron-forge/maker-zip"
+          "name": "@electron-forge/maker-flatpak",
+          "config": {
+            "options": {
+              "categories": [
+                "Development"
+              ]
+            }
+          }
         }
       ]
     }
   },
   "dependencies": {
+    "@electron-forge/maker-flatpak": "^6.0.0-beta.52",
     "electron-squirrel-startup": "^1.0.0",
     "node-abi": "^2.18.0"
   },
