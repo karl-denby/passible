@@ -18,8 +18,8 @@ let gAnsibleInventoryString: string = ''
 
 // --- --- --- Main --- --- ---
 function runCommands(commands: string[], callback: any) {
-  !commands 
-  ? console.error('no command sequence provided') 
+  !commands
+  ? console.error('no command sequence provided')
   : console.info(`Running: ${commands[0]}`)
 
   // Run command[0] if its the last/only in the list invoke callback to deal with results
@@ -108,7 +108,7 @@ btnCreateVM.onclick = (e) => {
   const selMemory = (document.getElementById("selMemory") as HTMLInputElement).value
   const selDisk = (document.getElementById("selDisk") as HTMLInputElement).value
   const cmd =
-    `multipass launch --disk ${selDisk} --mem ${selMemory} --cpus ${selProc} --name ${txtCreateVM} --cloud-init ${__dirname}/cloud-init/base.yaml`
+    `multipass launch --disk ${selDisk} --mem ${selMemory} --cpus ${selProc} --name ${txtCreateVM} --cloud-init ${__dirname}/cloud-init/base.yaml 18.04`
 
   mutateStatus(`Please wait, while we run the command: ${cmd}`)
   runCommands([cmd], function(stdout: string ) {
@@ -137,12 +137,12 @@ btnSetupVM.onclick = (e) => {
   let ansible_inventory = gAnsibleInventoryString
 
   // Setup hostnames across the inventory using ansible as the last command
-  cmdSequence.push(`env ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i '${ansible_inventory},' -e '{"ansible_python_interpreter":"/usr/bin/python3"}' ${__dirname + '/playbooks/hostnames.yaml'}`)
+  cmdSequence.push(`env ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i '${ansible_inventory},' -e 'ansible_python_interpreter=/usr/bin/python3' ${__dirname + '/playbooks/hostnames.yaml'}`)
 
   const result = runCommands(cmdSequence, function(stdout: string) {
     const ENV = `env ANSIBLE_HOST_KEY_CHECKING=false`
     const playbook = `${__dirname}/playbooks/hostnames.yaml`
-    const extras = `{"ansible_python_interpreter":"/usr/bin/python3"}`
+    const extras = `"ansible_python_interpreter=/usr/bin/python3"`
     const cmd = `${ENV} ansible-playbook -i '${ansible_inventory}' -e ${extras} ${playbook}`
 
     mutateStatus(`Please wait, while we run the command: ${cmd}`)
@@ -173,7 +173,7 @@ btnConfigureVM.onclick = (e) => {
 
   const ENV = `env ANSIBLE_HOST_KEY_CHECKING=false`
   const playbook = `${__dirname}/playbooks/${ansiblePlan}`
-  const extras = `{"ansible_python_interpreter":"/usr/bin/python3"}`
+  const extras = `"ansible_python_interpreter=/usr/bin/python3"`
   const cmd = `${ENV} ansible-playbook -i 'ubuntu@${targetVM.ipv4},' -e ${extras} ${playbook}`
 
   mutateStatus(`Please wait, while we run the command: ${cmd}`)

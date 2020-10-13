@@ -85,7 +85,7 @@ btnCreateVM.onclick = function (e) {
     var selProc = document.getElementById("selProc").value;
     var selMemory = document.getElementById("selMemory").value;
     var selDisk = document.getElementById("selDisk").value;
-    var cmd = "multipass launch --disk " + selDisk + " --mem " + selMemory + " --cpus " + selProc + " --name " + txtCreateVM + " --cloud-init " + __dirname + "/cloud-init/base.yaml";
+    var cmd = "multipass launch --disk " + selDisk + " --mem " + selMemory + " --cpus " + selProc + " --name " + txtCreateVM + " --cloud-init " + __dirname + "/cloud-init/base.yaml 18.04";
     mutateStatus("Please wait, while we run the command: " + cmd);
     runCommands([cmd], function (stdout) {
         mutateStatus("Result: " + stdout);
@@ -102,11 +102,11 @@ btnSetupVM.onclick = function (e) {
         cmdSequence.push("multipass exec " + vm.name + " -- sed -i '$r /home/ubuntu/.ssh/passible_key' /home/ubuntu/.ssh/authorized_keys");
     }
     var ansible_inventory = gAnsibleInventoryString;
-    cmdSequence.push("env ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i '" + ansible_inventory + ",' -e '{\"ansible_python_interpreter\":\"/usr/bin/python3\"}' " + (__dirname + '/playbooks/hostnames.yaml'));
+    cmdSequence.push("env ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i '" + ansible_inventory + ",' -e 'ansible_python_interpreter=/usr/bin/python3' " + (__dirname + '/playbooks/hostnames.yaml'));
     var result = runCommands(cmdSequence, function (stdout) {
         var ENV = "env ANSIBLE_HOST_KEY_CHECKING=false";
         var playbook = __dirname + "/playbooks/hostnames.yaml";
-        var extras = "{\"ansible_python_interpreter\":\"/usr/bin/python3\"}";
+        var extras = "\"ansible_python_interpreter=/usr/bin/python3\"";
         var cmd = ENV + " ansible-playbook -i '" + ansible_inventory + "' -e " + extras + " " + playbook;
         mutateStatus("Please wait, while we run the command: " + cmd);
         runCommands([cmd], function (output) {
@@ -128,7 +128,7 @@ btnConfigureVM.onclick = function (e) {
     targetVM.ipv4 = targetVM.ipv4.find(function (ip) { return ip != '0.0.0.0'; });
     var ENV = "env ANSIBLE_HOST_KEY_CHECKING=false";
     var playbook = __dirname + "/playbooks/" + ansiblePlan;
-    var extras = "{\"ansible_python_interpreter\":\"/usr/bin/python3\"}";
+    var extras = "\"ansible_python_interpreter=/usr/bin/python3\"";
     var cmd = ENV + " ansible-playbook -i 'ubuntu@" + targetVM.ipv4 + ",' -e " + extras + " " + playbook;
     mutateStatus("Please wait, while we run the command: " + cmd);
     runCommands([cmd], function (output) {
