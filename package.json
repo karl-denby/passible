@@ -50,6 +50,6 @@
     "@electron-forge/maker-zip": "^6.0.0-beta.51",
     "bulma": "^0.8.2",
     "electron": "^9.0.2",
-    "node-sass": "^4.14.1"
+    "node-sass": "^7.0.0"
   }
 }
